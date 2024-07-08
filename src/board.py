@@ -33,17 +33,46 @@ class Board:
                 (row + 1, col + 2),
                 (row - 1, col + 2),
             ]
-
             for possible_move in possible_moves:
                 possible_move_row, possible_move_col = possible_move
                 if Square.in_range(possible_move_row, possible_move_col):
-                    if self.squares[possible_move_row][possible_move_col].isempty_or_rival(piece.colour):
+                    if self.squares[possible_move_row][possible_move_col].isempty_or_enemy(piece.colour):
                         initial = Square(row, col)
                         final = Square(possible_move_row, possible_move_col)  # piece = piece
                         move = Move(initial, final)
                         piece.add_move(move)
 
         def pawn_moves():
+            # steps
+            steps = 1 if piece.moved else 2
+            # vertical
+            start = row + piece.dir
+            end = row + (piece.dir*(1+steps))
+            for possible_move_row in range(start, end, piece.dir):
+                if Square.in_range(possible_move_row):
+                    if self.squares[possible_move_row][col].isempty():
+                        initial = Square(possible_move_row, col)
+                        final = Square(possible_move_row, col)
+                        move = Move(initial, final)
+                        piece.add_move(move)
+                    else:
+                        break
+                        # therefore blocked
+                else:
+                    break
+                    # not in range
+            # diagonal/taking
+            possible_move_row = row + piece.dir
+            possible_move_cols = [col-1, col+1]
+            for possible_move_col in possible_move_cols:
+                if Square.in_range(possible_move_row, possible_move_col):
+                    if self.squares[possible_move_row][possible_move_col].has_enemy_piece(piece.colour):
+                        initial = Square(possible_move_row, possible_move_col)
+                        final = Square(possible_move_row, possible_move_col)
+                        move = Move(initial, final)
+                        piece.add_move(move)
+
+        def bishop_moves():
             pass
 
         if isinstance(piece, Pawn):
@@ -53,7 +82,7 @@ class Board:
             knight_moves()
 
         elif isinstance(piece, Bishop):
-            pass
+            bishop_moves()
 
         elif isinstance(piece, Rook):
             pass
@@ -78,8 +107,6 @@ class Board:
         # knights
         self.squares[row_pieces][1] = Square(row_pieces, 1, Knight(colour))
         self.squares[row_pieces][6] = Square(row_pieces, 6, Knight(colour))
-        self.squares[3][3] = Square(3, 3, Knight(colour))
-        self.squares[4][4] = Square(4, 4, Knight(colour))
 
         # bishops
         self.squares[row_pieces][2] = Square(row_pieces, 2, Bishop(colour))

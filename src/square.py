@@ -13,11 +13,11 @@ class Square:
     def has_team_piece(self, colour):
         return self.has_piece() and self.piece.colour == colour
 
-    def has_rival_piece(self, colour):
+    def has_enemy_piece(self, colour):
         return self.has_piece() and self.piece.colour != colour
 
-    def isempty_or_rival(self, colour):
-        return self.isempty() or self.has_rival_piece(colour)
+    def isempty_or_enemy(self, colour):
+        return self.isempty() or self.has_enemy_piece(colour)
 
     @staticmethod
     def in_range(*args):

@@ -23,7 +23,8 @@ class Main:
             game.show_moves(screen)
 
             if dragger.dragging:
-
+                game.show_bg(screen)
+                game.show_moves(screen)
                 game.show_pieces(screen)
                 dragger.update_blit(screen)
 
@@ -47,16 +48,12 @@ class Main:
                         game.show_moves(screen)
 
                 # ii) mouse track
-                elif event.type == pygame.MOUSEMOTION:
+                if event.type == pygame.MOUSEMOTION:
                     if dragger.dragging:
                         dragger.update_mouse(event.pos)
-                        game.show_bg(screen)
-                        game.show_moves(screen)
-                        game.show_pieces(screen)
-                        dragger.update_blit(screen)
 
                 # iii) release
-                elif event.type == pygame.MOUSEBUTTONUP:
+                if event.type == pygame.MOUSEBUTTONUP:
                     dragger.undrag_piece()
 
                 # quit
