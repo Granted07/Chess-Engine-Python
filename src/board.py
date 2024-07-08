@@ -1,6 +1,6 @@
 from const import *
-from src.move import Move
-from src.square import Square
+from move import Move
+from square import Square
 from piece import *
 
 
@@ -41,10 +41,13 @@ class Board:
                         initial = Square(row, col)
                         final = Square(possible_move_row, possible_move_col)  # piece = piece
                         move = Move(initial, final)
-                        piece.add_moves(move)
+                        piece.add_move(move)
+
+        def pawn_moves():
+            pass
 
         if isinstance(piece, Pawn):
-            pass
+            pawn_moves()
 
         elif isinstance(piece, Knight):
             knight_moves()
@@ -75,6 +78,8 @@ class Board:
         # knights
         self.squares[row_pieces][1] = Square(row_pieces, 1, Knight(colour))
         self.squares[row_pieces][6] = Square(row_pieces, 6, Knight(colour))
+        self.squares[3][3] = Square(3, 3, Knight(colour))
+        self.squares[4][4] = Square(4, 4, Knight(colour))
 
         # bishops
         self.squares[row_pieces][2] = Square(row_pieces, 2, Bishop(colour))

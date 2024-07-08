@@ -4,7 +4,7 @@ import pygame
 
 from const import *
 from board import Board
-from src.dragger import Dragger
+from dragger import Dragger
 
 
 class Game:
@@ -41,3 +41,11 @@ class Game:
                         img_center = col * SQUARE_SIZE + SQUARE_SIZE // 2, row * SQUARE_SIZE + SQUARE_SIZE // 2
                         piece.texture_rect = img.get_rect(center=img_center)
                         surface.blit(img, piece.texture_rect)
+
+    def show_moves(self, surface):
+        if self.dragger.dragging:
+            piece = self.dragger.piece
+            for move in piece.moves:
+                colour = '#c86464' if (move.final.row + move.final.col) % 2 == 0 else '#c84646'
+                rect = (move.final.col * SQUARE_SIZE, move.final.row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
+                pygame.draw.rect(surface, colour, rect)

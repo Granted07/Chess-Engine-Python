@@ -19,7 +19,7 @@ class Piece:
             f'assets/images/{size}px/{self.colour[0].upper()}{self.name.upper()}.png'
         )
 
-    def add_moves(self, move):
+    def add_move(self, move):
         self.moves.append(move)
 
 
