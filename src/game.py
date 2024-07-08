@@ -33,6 +33,10 @@ class Game:
 
                     # no dragger piece
                     if piece is not self.dragger.piece:
+                        try:
+                            piece.set_texture(80)
+                        except:
+                            pass
                         img = pygame.image.load(piece.texture)
                         img_center = col * SQUARE_SIZE + SQUARE_SIZE // 2, row * SQUARE_SIZE + SQUARE_SIZE // 2
                         piece.texture_rect = img.get_rect(center=img_center)

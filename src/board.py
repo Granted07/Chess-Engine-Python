@@ -1,4 +1,5 @@
 from const import *
+from src.move import Move
 from src.square import Square
 from piece import *
 
@@ -9,6 +10,56 @@ class Board:
         self._create()
         self._add_piece('white')
         self._add_piece('black')
+
+    def calc_moves(self, piece, row: int, col: int):
+
+        """
+        Calculates all possible moves for a piece
+        :param piece:
+        :param row:
+        :param col:
+        :return:
+        """
+
+        def knight_moves():
+            # 8 possible moves, all variations of 2,1
+            possible_moves = [
+                (row - 2, col + 1),
+                (row - 2, col - 1),
+                (row + 2, col + 1),
+                (row + 2, col - 1),
+                (row + 1, col - 2),
+                (row - 1, col - 2),
+                (row + 1, col + 2),
+                (row - 1, col + 2),
+            ]
+
+            for possible_move in possible_moves:
+                possible_move_row, possible_move_col = possible_move
+                if Square.in_range(possible_move_row, possible_move_col):
+                    if self.squares[possible_move_row][possible_move_col].isempty_or_rival(piece.colour):
+                        initial = Square(row, col)
+                        final = Square(possible_move_row, possible_move_col)  # piece = piece
+                        move = Move(initial, final)
+                        piece.add_moves(move)
+
+        if isinstance(piece, Pawn):
+            pass
+
+        elif isinstance(piece, Knight):
+            knight_moves()
+
+        elif isinstance(piece, Bishop):
+            pass
+
+        elif isinstance(piece, Rook):
+            pass
+
+        elif isinstance(piece, Queen):
+            pass
+
+        elif isinstance(piece, King):
+            pass
 
     def _create(self):
         for row in range(ROWS):
@@ -26,7 +77,7 @@ class Board:
         self.squares[row_pieces][6] = Square(row_pieces, 6, Knight(colour))
 
         # bishops
-        self.squares[row_pieces][2] = Square(row_pieces, 2,  Bishop(colour))
+        self.squares[row_pieces][2] = Square(row_pieces, 2, Bishop(colour))
         self.squares[row_pieces][5] = Square(row_pieces, 5, Bishop(colour))
 
         # rooks

@@ -38,18 +38,18 @@ class Main:
                         piece = board.squares[clicked_row][clicked_col].piece
                         dragger.save_initial(event.pos)
                         dragger.drag_piece(piece)
-                    clicked = True
 
                 # ii) mouse track
                 elif event.type == pygame.MOUSEMOTION:
                     if dragger.dragging:
                         dragger.update_mouse(event.pos)
+                        game.show_bg(screen)
+                        game.show_pieces(screen)
                         dragger.update_blit(screen)
 
                 # iii) release
                 elif event.type == pygame.MOUSEBUTTONUP:
                     dragger.undrag_piece()
-                    clicked = False
 
                 # quit
                 elif event.type == pygame.QUIT:

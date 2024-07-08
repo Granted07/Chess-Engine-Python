@@ -15,14 +15,9 @@ class Piece:
         self.moved = False
 
     def set_texture(self, size=80):
-        if size == 80:
-            self.texture = os.path.join(
-                f'assets/images/80px/{self.colour[0].upper()}{self.name.upper()}.png'
-            )
-        else:
-            self.texture = os.path.join(
-                f'assets/images/120px/{self.colour[0].upper()}{self.name.upper()}.png'
-            )
+        self.texture = os.path.join(
+            f'assets/images/{size}px/{self.colour[0].upper()}{self.name.upper()}.png'
+        )
 
     def add_moves(self, move):
         self.moves.append(move)
