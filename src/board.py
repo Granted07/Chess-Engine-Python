@@ -23,6 +23,11 @@ class Board:
             self.check_promotion(piece, final)
 
         # castling
+        if isinstance(piece, King):
+            if self.castle(initial, final):
+                diff = final.col - initial.col
+                rook = piece.left_rook if (diff < 0) else piece.right_rook
+                self.move(rook, rook.moves[-1])
 
         piece.moved = True
         piece.clear_moves()
@@ -32,8 +37,9 @@ class Board:
     def valid_move(piece, move):
         return move in piece.moves
 
-    def castle(self, initial, final):
-        pass
+    @staticmethod
+    def castle(initial, final):
+        return abs(initial.col - final.col) == 2
 
     def calc_moves(self, piece, row: int, col: int):
 
@@ -44,9 +50,6 @@ class Board:
         :param col:
         :return:
         """
-
-
-
 
         def straight_line_moves(incs):
             for inc in incs:
@@ -141,20 +144,40 @@ class Board:
                         final = Square(possible_move_row, possible_move_col)  # piece = piece
                         move = Move(initial, final)
                         piece.add_move(move)
-
+            # castling
             if not piece.moved:
-                left_rook, right_rook = self.squares[row][0], self.squares[row][7]
+                left_rook, right_rook = self.squares[row][0].piece, self.squares[row][7].piece
                 if isinstance(left_rook, Rook):
                     if not left_rook.moved:
-                        empty: bool = True
-                        for check_col in range(1, 4):
-                            if not self.squares[row][check_col].has_piece():
+                        for c in range(1, 4):
+                            if self.squares[row][c].has_piece():
                                 break
-                            if check_col == 3:
-                                pass
+                            if c == 3:
+                                piece.left_rook = left_rook
+                                initial = Square(row, 0)
+                                final = Square(row, 3)
+                                move = Move(initial, final)
+                                left_rook.add_move(move)
+                                initial = Square(row, col)
+                                final = Square(row, 2)
+                                move = Move(initial, final)
+                                piece.add_move(move)
+
                 if isinstance(right_rook, Rook):
                     if not right_rook.moved:
-                        pass
+                        for c in range(5, 7):
+                            if self.squares[row][c].has_piece():
+                                break
+                            if c == 6:
+                                piece.right_rook = right_rook
+                                initial = Square(row, 7)
+                                final = Square(row, 5)
+                                move = Move(initial, final)
+                                right_rook.add_move(move)
+                                initial = Square(row, col)
+                                final = Square(row, 6)
+                                move = Move(initial, final)
+                                piece.add_move(move)
 
         if isinstance(piece, Pawn):
             pawn_moves()
