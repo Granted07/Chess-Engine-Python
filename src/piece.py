@@ -29,6 +29,7 @@ class Piece:
 class Pawn(Piece):
     def __init__(self, colour: str):
         self.dir = -1 if colour == 'white' else 1
+        self.en_passant: bool = False
         super().__init__('pawn', colour, 1.0)
 
 

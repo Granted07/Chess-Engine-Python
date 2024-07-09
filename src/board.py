@@ -16,12 +16,28 @@ class Board:
     def move(self, piece, move):
         initial = move.initial
         final = move.final
+
+        em_passant_empty = self.squares[final.row][final.col].isempty()
+
         # board move update
         self.squares[initial.row][initial.col].piece = None
         self.squares[final.row][final.col].piece = piece
-        # promotion
+
+        # promotion and en passant
         if isinstance(piece, Pawn):
-            self.check_promotion(piece, final)
+
+            diff = final.col - initial.col
+            if diff != 0 and em_passant_empty:
+                self.squares[initial.row][initial.col + diff].piece = None
+                self.squares[final.row][final.col].piece = piece
+
+            # en passant
+            if self.en_passant(initial, final):
+                piece.en_passant = True
+                # print('2 sq moved')
+            # promotion
+            else:
+                self.check_promotion(piece, final)
 
         # castling
         if isinstance(piece, King):
@@ -45,7 +61,10 @@ class Board:
     def in_check(self, piece, move):
         temp_piece = copy.deepcopy(piece)
         temp_board = copy.deepcopy(self)
-        temp_board.move(temp_piece, move)
+        try:
+            temp_board.move(temp_piece, move)
+        except:
+            pass
 
         for row in range(ROWS):
             for col in range(COLS):
@@ -57,10 +76,11 @@ class Board:
                             return True
         return False
 
-    def calc_moves(self, piece, row: int, col: int, bl: bool=True):
+    def calc_moves(self, piece, row: int, col: int, bl: bool = True):
 
         """
         Calculates all possible moves for a piece
+        :param bl:
         :param piece:
         :param row:
         :param col:
@@ -142,6 +162,35 @@ class Board:
                                 piece.add_move(move)
                         else:
                             piece.add_move(move)
+            # en passant
+            r = 3 if piece.colour == 'white' else 4
+            fr = 2 if piece.colour == 'white' else 5
+            # left en passant
+            if Square.in_range(col-1) and row == r:
+                if self.squares[row][col-1].has_enemy_piece(piece.colour):
+                    p = self.squares[row][col-1].piece
+                    if isinstance(p, Pawn):
+                        if p.en_passant:
+                            move = Move(Square(row, col), Square(fr, col-1, p))
+                            # check fo checks
+                            if bl:
+                                if not self.in_check(piece, move):
+                                    piece.add_move(move)
+                            else:
+                                piece.add_move(move)
+            # right en passant
+            if Square.in_range(col+1) and row == r:
+                if self.squares[row][col+1].has_enemy_piece(piece.colour):
+                    p = self.squares[row][col+1].piece
+                    if isinstance(p, Pawn):
+                        if p.en_passant:
+                            move = Move(Square(row, col), Square(fr, col+1, p))
+                            # check fo checks
+                            if bl:
+                                if not self.in_check(piece, move):
+                                    piece.add_move(move)
+                            else:
+                                piece.add_move(move)
 
         def knight_moves():
             # 8 possible moves, all variations of 2,1
@@ -193,8 +242,6 @@ class Board:
                         if bl:
                             if not self.in_check(piece, move):
                                 piece.add_move(move)
-                            else:
-                                break
                         else:
                             piece.add_move(move)
             # castling
@@ -209,7 +256,6 @@ class Board:
                                 piece.left_rook = left_rook
                                 moveL = Move(Square(row, 0), Square(row, 3))
                                 moveK = Move(Square(row, col), Square(row, 2))
-
                                 if bl:
                                     if not self.in_check(piece, moveK) and not self.in_check(left_rook, moveL):
                                         left_rook.add_move(moveL)
@@ -229,18 +275,15 @@ class Board:
                                 piece.right_rook = right_rook
                                 moveR = Move(Square(row, 7), Square(row, 5))
                                 moveK = Move(Square(row, col), Square(row, 6))
-                                right_rook.add_move(moveR)
-                                piece.add_move(moveK)
                                 if bl:
                                     if not self.in_check(piece, moveK) and not self.in_check(right_rook, moveR):
-                                        piece.add_move(moveK)
                                         right_rook.add_move(moveR)
+                                        piece.add_move(moveK)
                                     else:
                                         break
                                 else:
                                     right_rook.add_move(moveR)
                                     piece.add_move(moveK)
-
 
         if isinstance(piece, Pawn):
             pawn_moves()
@@ -299,3 +342,8 @@ class Board:
     def check_promotion(self, piece, final):
         if final.row == 0 or final.row == 7:
             self.squares[final.row][final.col].piece = Queen(piece.colour)
+
+    @staticmethod
+    def en_passant(initial, final):
+        return abs(initial.row - final.row) == 2
+
