@@ -23,12 +23,14 @@ class Main:
             game.show_bg(screen)
             game.show_pieces(screen)
             game.show_moves(screen)
+            game.show_hover(screen)
 
             if dragger.dragging:
                 game.show_bg(screen)
                 game.show_moves(screen)
                 game.show_pieces(screen)
                 dragger.update_blit(screen)
+                game.show_hover(screen)
 
             for event in pygame.event.get():
 
@@ -51,6 +53,7 @@ class Main:
                             game.show_bg(screen)
                             game.show_moves(screen)
                             game.show_pieces(screen)
+                            game.show_hover(screen)
 
                 # ii) mouse track
                 if event.type == pygame.MOUSEMOTION:
@@ -69,8 +72,10 @@ class Main:
                         move = Move(initial, final)
                         if board.valid_move(dragger.piece, move):
                             board.move(dragger.piece, move)
+                            board.set_true_en_passant(dragger.piece)
                             game.show_bg(screen)
                             game.show_moves(screen)
+                            game.show_hover(screen)
                             game.next_turn()
                     dragger.undrag_piece()
 
@@ -81,6 +86,10 @@ class Main:
                         screen = self.screen
                         dragger = self.game.dragger
                         board = self.game.board
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_t:
+                        game.change_theme()
 
                 # quit
                 elif event.type == pygame.QUIT:

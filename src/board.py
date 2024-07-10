@@ -7,6 +7,7 @@ from piece import *
 
 class Board:
     def __init__(self):
+        self.last_moves = None
         self.squares = [[0 for _ in range(ROWS)] for _ in range(COLS)]
         self.last_move = None
         self._create()
@@ -32,8 +33,6 @@ class Board:
                 self.squares[final.row][final.col].piece = piece
 
             # en passant
-            if self.en_passant(initial, final):
-                piece.en_passant = True
                 # print('2 sq moved')
             # promotion
             else:
@@ -343,7 +342,11 @@ class Board:
         if final.row == 0 or final.row == 7:
             self.squares[final.row][final.col].piece = Queen(piece.colour)
 
-    @staticmethod
-    def en_passant(initial, final):
-        return abs(initial.row - final.row) == 2
-
+    def set_true_en_passant(self, piece):
+        if not isinstance(piece, Pawn):
+            return
+        for row in range(ROWS):
+            for col in range(COLS):
+                if isinstance(self.squares[row][col].piece, Pawn):
+                    self.squares[row][col].piece.en_passant = False
+        piece.en_passant = True
