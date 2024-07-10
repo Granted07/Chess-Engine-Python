@@ -28,6 +28,16 @@ class Game:
                     colour, f = theme.bg.light, 1  # light
                 rect = (col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
                 pygame.draw.rect(surface, colour, rect)
+                if col == 0:
+                    colour = theme.bg.dark if row % 2 == 0 else theme.bg.light
+                    lbl = self.config.font.render(str(ROWS - row), 1, colour)
+                    lbl_pos = (5, 5 + row * SQUARE_SIZE)
+                    surface.blit(lbl, lbl_pos)
+                if row == 7:
+                    colour = theme.bg.dark if (row + col) % 2 == 0 else theme.bg.light
+                    lbl = self.config.font.render(chr(col+65), 1, colour)
+                    lbl_pos = (col * SQUARE_SIZE + SQUARE_SIZE - 20, HEIGHT - 20)
+                    surface.blit(lbl, lbl_pos)
 
     def show_pieces(self, surface):
         for row in range(ROWS):
@@ -52,24 +62,21 @@ class Game:
                 rect = (move.final.col * SQUARE_SIZE, move.final.row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
                 pygame.draw.rect(surface, colour, rect)
 
-    def show_last_moves(self, surface):
+    def show_last_move(self, surface):
         theme = self.config.theme
-        if self.board.last_moves:
-            initial = self.board.last_moves.initial
-            final = self.board.last_moves.final
-
+        if self.board.last_move:
+            initial = self.board.last_move.initial
+            final = self.board.last_move.final
             for pos in [initial, final]:
                 color = theme.trace.light if (pos.row + pos.col) % 2 == 0 else theme.trace.dark
-                pygame.draw.rect(surface, color, pos)
+                rect = (pos.col * SQUARE_SIZE, pos.row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
+                pygame.draw.rect(surface, color, rect)
 
     def show_hover(self, surface):
         if self.hovered_sqr:
-            # color
-            color = (180, 180, 180)
-            # rect
+            colour = (180, 180, 180)
             rect = (self.hovered_sqr.col * SQUARE_SIZE, self.hovered_sqr.row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
-            # blit
-            pygame.draw.rect(surface, color, rect, width=3)
+            pygame.draw.rect(surface, colour, rect, width=3)
 
     def next_turn(self):
         self.next_player = 'white' if self.next_player == 'black' else 'black'
@@ -82,3 +89,9 @@ class Game:
 
     def reset(self):
         self.__init__()
+
+    def sound_effect(self, captured: bool = False):
+        if captured:
+            self.config.capture_sound.play()
+        else:
+            self.config.move_sound.play()

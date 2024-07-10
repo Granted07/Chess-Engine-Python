@@ -9,4 +9,4 @@ class Sound:
         pass
 
     def play(self):
-        pygame.mixer.Sound.play(self.path)
+        pygame.mixer.Sound.play(self.sound)

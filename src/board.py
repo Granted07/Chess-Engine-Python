@@ -3,6 +3,7 @@ from const import *
 from move import Move
 from square import Square
 from piece import *
+from src.sound import Sound
 
 
 class Board:
@@ -14,7 +15,7 @@ class Board:
         self._add_piece('white')
         self._add_piece('black')
 
-    def move(self, piece, move):
+    def move(self, piece, move, testing=False):
         initial = move.initial
         final = move.final
 
@@ -31,6 +32,9 @@ class Board:
             if diff != 0 and em_passant_empty:
                 self.squares[initial.row][initial.col + diff].piece = None
                 self.squares[final.row][final.col].piece = piece
+                if not testing:
+                    sound = Sound(os.path.join('assets/sounds/capture.wav'))
+                    sound.play()
 
             # en passant
                 # print('2 sq moved')
@@ -61,7 +65,7 @@ class Board:
         temp_piece = copy.deepcopy(piece)
         temp_board = copy.deepcopy(self)
         try:
-            temp_board.move(temp_piece, move)
+            temp_board.move(temp_piece, move, testing = True)
         except:
             pass
 
