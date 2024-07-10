@@ -3,7 +3,7 @@ from const import *
 from move import Move
 from square import Square
 from piece import *
-from src.sound import Sound
+from sound import Sound
 
 
 class Board:
