@@ -30,17 +30,17 @@ class Pawn(Piece):
     def __init__(self, colour: str):
         self.dir = -1 if colour == 'white' else 1
         self.en_passant: bool = False
-        super().__init__('pawn', colour, 1.0)
+        super().__init__('pawn', colour, 1)
 
 
 class Knight(Piece):
     def __init__(self, colour: str):
-        super().__init__('knight', colour, 3.0)
+        super().__init__('knight', colour, 3)
 
 
 class Bishop(Piece):
     def __init__(self, colour: str):
-        super().__init__('bishop', colour, 3.001)
+        super().__init__('bishop', colour, 3)
 
 
 class Rook(Piece):
