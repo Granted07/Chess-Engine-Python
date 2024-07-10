@@ -56,7 +56,6 @@ class Main:
                             game.show_last_move(screen)
                             game.show_moves(screen)
                             game.show_pieces(screen)
-                            
 
                 # ii) mouse track
                 if event.type == pygame.MOUSEMOTION:
@@ -81,7 +80,7 @@ class Main:
                             game.show_bg(screen)
                             game.show_last_move(screen)
                             game.show_moves(screen)
-                            
+
                             game.next_turn()
                     dragger.undrag_piece()
 

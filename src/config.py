@@ -23,7 +23,7 @@ class Config:
         self.theme = self.themes[self.index]
 
     def _add_themes(self):
-        blue = Theme((36, 166, 209), (167, 216, 232),
+        blue = Theme((167, 216, 232), (36, 166, 209),
                      (240, 236, 141), (247, 240, 59),
                      '#C86464', '#C84646')
 

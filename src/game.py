@@ -6,6 +6,7 @@ from const import *
 from board import Board
 from dragger import Dragger
 from config import Config
+from minimax import Ai
 
 
 class Game:
@@ -15,6 +16,7 @@ class Game:
         self.dragger = Dragger()
         self.next_player = 'white'
         self.config = Config()
+        self.ai = Ai()
 
     def show_bg(self, surface):
         theme = self.config.theme

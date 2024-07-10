@@ -19,7 +19,7 @@ class Board:
         initial = move.initial
         final = move.final
 
-        em_passant_empty = self.squares[final.row][final.col].isempty()
+        en_passant_empty = self.squares[final.row][final.col].isempty()
 
         # board move update
         self.squares[initial.row][initial.col].piece = None
@@ -29,7 +29,7 @@ class Board:
         if isinstance(piece, Pawn):
 
             diff = final.col - initial.col
-            if diff != 0 and em_passant_empty:
+            if diff != 0 and en_passant_empty:
                 self.squares[initial.row][initial.col + diff].piece = None
                 self.squares[final.row][final.col].piece = piece
                 if not testing:
@@ -37,7 +37,7 @@ class Board:
                     sound.play()
 
             # en passant
-                # print('2 sq moved')
+            # print('2 sq moved')
             # promotion
             else:
                 self.check_promotion(piece, final)
@@ -65,8 +65,8 @@ class Board:
         temp_piece = copy.deepcopy(piece)
         temp_board = copy.deepcopy(self)
         try:
-            temp_board.move(temp_piece, move, testing = True)
-        except:
+            temp_board.move(temp_piece, move, testing=True)
+        except IndexError:
             pass
 
         for row in range(ROWS):
@@ -87,7 +87,6 @@ class Board:
         :param piece:
         :param row:
         :param col:
-        :return:
         """
 
         def straight_line_moves(incs):
@@ -169,12 +168,12 @@ class Board:
             r = 3 if piece.colour == 'white' else 4
             fr = 2 if piece.colour == 'white' else 5
             # left en passant
-            if Square.in_range(col-1) and row == r:
-                if self.squares[row][col-1].has_enemy_piece(piece.colour):
-                    p = self.squares[row][col-1].piece
+            if Square.in_range(col - 1) and row == r:
+                if self.squares[row][col - 1].has_enemy_piece(piece.colour):
+                    p = self.squares[row][col - 1].piece
                     if isinstance(p, Pawn):
                         if p.en_passant:
-                            move = Move(Square(row, col), Square(fr, col-1, p))
+                            move = Move(Square(row, col), Square(fr, col - 1, p))
                             # check fo checks
                             if bl:
                                 if not self.in_check(piece, move):
@@ -182,12 +181,12 @@ class Board:
                             else:
                                 piece.add_move(move)
             # right en passant
-            if Square.in_range(col+1) and row == r:
-                if self.squares[row][col+1].has_enemy_piece(piece.colour):
-                    p = self.squares[row][col+1].piece
+            if Square.in_range(col + 1) and row == r:
+                if self.squares[row][col + 1].has_enemy_piece(piece.colour):
+                    p = self.squares[row][col + 1].piece
                     if isinstance(p, Pawn):
                         if p.en_passant:
-                            move = Move(Square(row, col), Square(fr, col+1, p))
+                            move = Move(Square(row, col), Square(fr, col + 1, p))
                             # check fo checks
                             if bl:
                                 if not self.in_check(piece, move):
