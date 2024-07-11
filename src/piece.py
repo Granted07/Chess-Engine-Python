@@ -1,4 +1,3 @@
-import math
 import os
 
 
@@ -57,4 +56,4 @@ class King(Piece):
     def __init__(self, colour: str):
         self.left_rook = None
         self.right_rook = None
-        super().__init__('king', colour, value=math.inf)
+        super().__init__('king', colour, value=1000)

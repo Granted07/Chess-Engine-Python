@@ -4,7 +4,7 @@ from const import *
 from game import Game
 from square import Square
 from move import Move
-from minimax import Ai
+from minimax import minimax
 
 
 class Main:
@@ -81,10 +81,10 @@ class Main:
                             game.show_bg(screen)
                             game.show_last_move(screen)
                             game.show_moves(screen)
-                            Ai(board, game.next_player).minimax()
+                            if game.next_player == 'white':
+                                print(minimax(board))
                             game.next_turn()
                     dragger.undrag_piece()
-
 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_r:

@@ -1,3 +1,6 @@
+import math
+
+
 class Move:
 
     def __init__(self, initial, final):
@@ -6,8 +9,8 @@ class Move:
 
     def __str__(self):
         s = ''
-        s += f'{self.initial.col}, {self.initial.row}'
-        s += f'; {self.final.col}, {self.final.row}'
+        s += f'{chr(ord('A') + self.initial.col)}{int(math.fabs(self.initial.row-8))}'
+        s += f'; {chr(ord('A') + self.final.col)}{int(math.fabs(self.final.row-8))}'
         return s
 
     def __eq__(self, other):
