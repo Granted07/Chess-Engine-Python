@@ -4,7 +4,7 @@ from const import *
 from game import Game
 from square import Square
 from move import Move
-from minimax import minimax
+from minimax import minimax, get_best_move, analyze_position
 
 
 class Main:
@@ -82,7 +82,11 @@ class Main:
                             game.show_last_move(screen)
                             game.show_moves(screen)
                             if game.next_player == 'white':
-                                print(minimax(board))
+                                best_move = get_best_move(board, depth=2, maximizing_player=False, verbose=True)
+                                if best_move:
+                                    piece, (start_row, start_col), move = best_move
+                                    # Apply the move automatically or show it to user
+
                             game.next_turn()
                     dragger.undrag_piece()
 
@@ -93,6 +97,9 @@ class Main:
                         screen = self.screen
                         dragger = self.game.dragger
                         board = self.game.board
+
+                    if event.key == pygame.K_a:  # Press 'A' for analysis
+                        analyze_position(board, depth=2, verbose=True)
 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_t:
