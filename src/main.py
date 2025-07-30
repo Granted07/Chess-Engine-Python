@@ -4,20 +4,21 @@ from const import *
 from game import Game
 from square import Square
 from move import Move
-from minimax import minimax, get_best_move, analyze_position
-
+from minimax import get_best_move_optimized
 
 class Main:
 
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        self.depth = int(input("Analysis Depth: "))
         pygame.display.set_caption('Chess Engine')
         self.game = Game()
 
     def mainloop(self):
         game = self.game
         screen = self.screen
+        depth = self.depth
         dragger = self.game.dragger
         board = self.game.board
         while True:
@@ -82,10 +83,17 @@ class Main:
                             game.show_last_move(screen)
                             game.show_moves(screen)
                             if game.next_player == 'white':
-                                best_move = get_best_move(board, depth=2, maximizing_player=False, verbose=True)
+                                best_move = get_best_move_optimized(
+                                    board,
+                                    depth=depth,
+                                    maximizing_player=False,
+                                    time_limit=3.0,
+                                    verbose=True
+                                )
                                 if best_move:
                                     piece, (start_row, start_col), move = best_move
-                                    # Apply the move automatically or show it to user
+                                    print(
+                                        f"AI plays: {piece.name} {start_row},{start_col} -> {move.final.row},{move.final.col}")
 
                             game.next_turn()
                     dragger.undrag_piece()
@@ -99,7 +107,7 @@ class Main:
                         board = self.game.board
 
                     if event.key == pygame.K_a:  # Press 'A' for analysis
-                        analyze_position(board, depth=2, verbose=True)
+                        pass
 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_t:
