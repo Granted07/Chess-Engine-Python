@@ -1,4 +1,5 @@
 import os
+import sys
 
 
 class Piece:
@@ -14,7 +15,9 @@ class Piece:
         self.moved = False
 
     def set_texture(self, size=80):
+        base = getattr(sys, '_MEIPASS', os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
         self.texture = os.path.join(
+            base,
             f'assets/images/{size}px/{self.colour[0].upper()}{self.name.upper()}.png'
         )
 

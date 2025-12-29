@@ -1,4 +1,5 @@
 import copy
+import os
 from const import *
 from move import Move
 from square import Square

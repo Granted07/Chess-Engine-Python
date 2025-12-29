@@ -11,7 +11,8 @@ class Main:
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        self.depth = int(input("Analysis Depth: "))
+        self.depth = 4
+        # self.depth = int(input("Analysis Depth: "))
         pygame.display.set_caption('Chess Engine')
         self.game = Game()
 

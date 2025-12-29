@@ -12,6 +12,7 @@ from piece import Pawn, Knight, Bishop, Rook, Queen, King
 # ---------------------------------------------------------------------------
 INF = 10**9
 EXACT, LOWERBOUND, UPPERBOUND = 0, 1, 2
+DRAW_SCORE = 0
 
 PIECE_VALUES = {
     'pawn': 100,
@@ -127,6 +128,8 @@ class EngineState:
         self.castling_rights = 0
         self.ep_file = None
         self.king_pos = {'white': (0, 4), 'black': (7, 4)}
+        self.rep_stack = []
+        self.rep_counts = {}
 
     def reset(self, start_hash, time_limit=None):
         self.nodes = 0
@@ -137,6 +140,8 @@ class EngineState:
         self.current_hash = start_hash
         self.castling_rights = 0
         self.ep_file = None
+        self.rep_stack = []
+        self.rep_counts = {}
 
 engine = EngineState()
 
@@ -167,6 +172,30 @@ def evaluate(board):
                 score += sign * base
                 score += sign * pst_value(p, row, col)
     return score
+
+
+def material_is_low(board):
+    total = 0
+    queens = 0
+    non_pawn_material = 0
+    for row in range(ROWS):
+        for col in range(COLS):
+            p = board.squares[row][col].piece
+            if not p or isinstance(p, King):
+                continue
+            val = PIECE_VALUES[p.name]
+            total += val
+            if isinstance(p, Queen):
+                queens += 1
+            if not isinstance(p, Pawn):
+                non_pawn_material += val
+    if non_pawn_material == 0:
+        return True
+    if queens == 0:
+        return True
+    if total <= 1400:
+        return True
+    return False
 
 
 def detect_castling_rights(board):
@@ -705,86 +734,114 @@ def quiescence(board, alpha, beta, colour, ply):
 def negamax(board, depth, alpha, beta, colour, ply):
     if engine.time_limit and (time.time() - engine.start_time) >= engine.time_limit:
         raise TimeoutError
+    if engine.rep_counts.get(engine.current_hash, 0) >= 2:
+        return DRAW_SCORE, None  # repetition draw
 
-    engine.nodes += 1
-    orig_alpha = alpha
+    engine.rep_stack.append(engine.current_hash)
+    engine.rep_counts[engine.current_hash] = engine.rep_counts.get(engine.current_hash, 0) + 1
 
-    tt_entry = engine.tt.get(engine.current_hash)
-    tt_move_key = None
-    if tt_entry and tt_entry['depth'] >= depth:
-        engine.tt_hits += 1
-        tt_move_key = tt_entry['move']
-        flag = tt_entry['flag']
-        tt_score = tt_entry['score']
-        if flag == EXACT:
-            return tt_score, tt_move_key
-        elif flag == LOWERBOUND:
-            alpha = max(alpha, tt_score)
-        elif flag == UPPERBOUND:
-            beta = min(beta, tt_score)
-        if alpha >= beta:
-            engine.cutoffs += 1
-            return tt_score, tt_move_key
-    elif tt_entry:
-        tt_move_key = tt_entry['move']
+    try:
+        engine.nodes += 1
+        orig_alpha = alpha
 
-    if depth == 0:
-        return quiescence(board, alpha, beta, colour, ply), None
+        tt_entry = engine.tt.get(engine.current_hash)
+        tt_move_key = None
+        if tt_entry and tt_entry['depth'] >= depth:
+            engine.tt_hits += 1
+            tt_move_key = tt_entry['move']
+            flag = tt_entry['flag']
+            tt_score = tt_entry['score']
+            if flag == EXACT:
+                return tt_score, tt_move_key
+            elif flag == LOWERBOUND:
+                alpha = max(alpha, tt_score)
+            elif flag == UPPERBOUND:
+                beta = min(beta, tt_score)
+            if alpha >= beta:
+                engine.cutoffs += 1
+                return tt_score, tt_move_key
+        elif tt_entry:
+            tt_move_key = tt_entry['move']
 
-    legal_moves = generate_legal_moves(board, colour)
-    if not legal_moves:
-        if king_in_check(board, colour):
-            return -INF + ply, None
-        return 0, None
+        if depth == 0:
+            return quiescence(board, alpha, beta, colour, ply), None
 
-    ordered_moves = order_moves(board, legal_moves, tt_move_key, ply)
+        side_in_check = king_in_check(board, colour)
 
-    best_move_key = None
-    best_score = -INF
+        if depth >= 3 and not side_in_check and not material_is_low(board):
+            null_depth = depth - 1 - 2
+            engine.current_hash ^= ZOBRIST_SIDE
+            try:
+                null_score, _ = negamax(board, null_depth, -beta, -beta + 1, 'black' if colour == 'white' else 'white', ply + 1)
+                null_score = -null_score
+            finally:
+                engine.current_hash ^= ZOBRIST_SIDE
+            if null_score >= beta:
+                engine.cutoffs += 1
+                return beta, None  # null-move cutoff
 
-    for move, promo in ordered_moves:
-        undo, new_hash = make_move(board, move, promo, colour)
-        engine.current_hash = new_hash
-        try:
-            score, _ = negamax(board, depth - 1, -beta, -alpha, 'black' if colour == 'white' else 'white', ply + 1)
-            score = -score
-        except TimeoutError:
+        legal_moves = generate_legal_moves(board, colour)
+        if not legal_moves:
+            if king_in_check(board, colour):
+                return -INF + ply, None
+            return DRAW_SCORE, None
+
+        ordered_moves = order_moves(board, legal_moves, tt_move_key, ply)
+
+        best_move_key = None
+        best_score = -INF
+
+        for move, promo in ordered_moves:
+            undo, new_hash = make_move(board, move, promo, colour)
+            engine.current_hash = new_hash
+            try:
+                score, _ = negamax(board, depth - 1, -beta, -alpha, 'black' if colour == 'white' else 'white', ply + 1)
+                score = -score
+            except TimeoutError:
+                undo_move(board, move, undo)
+                engine.current_hash = undo['prev_hash']
+                raise
             undo_move(board, move, undo)
             engine.current_hash = undo['prev_hash']
-            raise
-        undo_move(board, move, undo)
-        engine.current_hash = undo['prev_hash']
 
-        if score > best_score:
-            best_score = score
-            best_move_key = encode_move(move, promo)
-        if score > alpha:
-            alpha = score
-        if alpha >= beta:
-            engine.cutoffs += 1
-            if board.squares[move.final.row][move.final.col].piece is None:
-                k1, k2 = engine.killers[ply]
-                key = encode_move(move, promo)
-                if k1 != key:
-                    engine.killers[ply][1] = k1
-                    engine.killers[ply][0] = key
-                engine.history[key] = engine.history.get(key, 0) + depth * depth
-            break
+            if score > best_score:
+                best_score = score
+                best_move_key = encode_move(move, promo)
+            if score > alpha:
+                alpha = score
+            if alpha >= beta:
+                engine.cutoffs += 1
+                if board.squares[move.final.row][move.final.col].piece is None:
+                    k1, k2 = engine.killers[ply]
+                    key = encode_move(move, promo)
+                    if k1 != key:
+                        engine.killers[ply][1] = k1
+                        engine.killers[ply][0] = key
+                    engine.history[key] = engine.history.get(key, 0) + depth * depth
+                break
 
-    flag = EXACT
-    if best_score <= orig_alpha:
-        flag = UPPERBOUND
-    elif best_score >= beta:
-        flag = LOWERBOUND
+        flag = EXACT
+        if best_score <= orig_alpha:
+            flag = UPPERBOUND
+        elif best_score >= beta:
+            flag = LOWERBOUND
 
-    engine.tt[engine.current_hash] = {
-        'depth': depth,
-        'score': best_score,
-        'flag': flag,
-        'move': best_move_key,
-    }
+        engine.tt[engine.current_hash] = {
+            'depth': depth,
+            'score': best_score,
+            'flag': flag,
+            'move': best_move_key,
+        }
 
-    return best_score, best_move_key
+        return best_score, best_move_key
+    finally:
+        cnt = engine.rep_counts.get(engine.current_hash, 0)
+        if cnt <= 1:
+            engine.rep_counts.pop(engine.current_hash, None)
+        else:
+            engine.rep_counts[engine.current_hash] = cnt - 1
+        if engine.rep_stack:
+            engine.rep_stack.pop()
 
 # ---------------------------------------------------------------------------
 # Public interface
