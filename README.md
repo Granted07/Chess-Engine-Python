@@ -9,17 +9,6 @@ Making a Chess Engine from Scratch
 ### Prerequisites
 Have Python 3.11 or higher installed from Microsoft store on Windows or install it from your package installer for your Linux distribution
 
-### Setup
-
--Linux
-  run `setup.sh` and run the script only using `run.sh`
-
--Windows
-  run `setup.bat` and run the script only using `run.bat`
-
-### Coming Soon:
-- AI Vs Player Mode
-
 
 ### Themes
 ![alt text](https://github.com/Granted07/Chess-Engine-Python/blob/3b9d97707f522fae4e9c4603138e5d000bdb24dd/assets/screenshots/blue.png) 
