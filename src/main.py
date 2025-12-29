@@ -15,6 +15,36 @@ class Main:
         pygame.display.set_caption('Chess Engine')
         self.game = Game()
 
+    def play_ai_move(self):
+        game = self.game
+        board = game.board
+
+        best_move = get_best_move_optimized(
+            board,
+            depth=self.depth,
+            maximizing_player=True,
+            time_limit=3.0,
+            verbose=True
+        )
+
+        if not best_move:
+            return
+
+        piece, (_, _), move = best_move
+        captured = board.squares[move.final.row][move.final.col].has_piece()
+
+        board.move(piece, move)
+        game.sound_effect(captured)
+        board.set_true_en_passant(piece)
+
+        game.show_bg(self.screen)
+        game.show_last_move(self.screen)
+        game.show_moves(self.screen)
+        game.show_pieces(self.screen)
+        game.show_hover(self.screen)
+
+        game.next_turn()
+
     def mainloop(self):
         game = self.game
         screen = self.screen
@@ -82,20 +112,10 @@ class Main:
                             game.show_bg(screen)
                             game.show_last_move(screen)
                             game.show_moves(screen)
-                            if game.next_player == 'white':
-                                best_move = get_best_move_optimized(
-                                    board,
-                                    depth=depth,
-                                    maximizing_player=False,
-                                    time_limit=3.0,
-                                    verbose=True
-                                )
-                                if best_move:
-                                    piece, (start_row, start_col), move = best_move
-                                    print(
-                                        f"AI plays: {piece.name} {start_row},{start_col} -> {move.final.row},{move.final.col}")
-
                             game.next_turn()
+
+                            if game.next_player == 'black':
+                                self.play_ai_move()
                     dragger.undrag_piece()
 
                 if event.type == pygame.KEYDOWN:
