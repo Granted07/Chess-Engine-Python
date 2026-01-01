@@ -44,11 +44,16 @@ class Board:
                 self.check_promotion(piece, final)
 
         # castling
-        if isinstance(piece, King):
-            if self.castle(initial, final):
-                diff = final.col - initial.col
-                rook = piece.left_rook if (diff < 0) else piece.right_rook
-                self.move(rook, rook.moves[-1])
+        if isinstance(piece, King) and self.castle(initial, final):
+            diff = final.col - initial.col
+            rook_from_col = 0 if diff < 0 else 7
+            rook_to_col = final.col + 1 if diff < 0 else final.col - 1
+            
+            rook = self.squares[initial.row][rook_from_col].piece
+            if isinstance(rook, Rook):
+                # move rook
+                self.squares[initial.row][rook_from_col].piece = None
+                self.squares[initial.row][rook_to_col].piece = rook
 
         piece.moved = True
         piece.clear_moves()

@@ -5,6 +5,9 @@ from game import Game
 from square import Square
 from move import Move
 from minimax import get_best_move_optimized
+import time
+
+AI_MOVE_EVENT = pygame.USEREVENT + 1
 
 class Main:
 
@@ -69,6 +72,9 @@ class Main:
 
             for event in pygame.event.get():
 
+                if event.type == AI_MOVE_EVENT:
+                    self.play_ai_move()
+
                 # i) click
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     dragger.update_mouse(event.pos)
@@ -110,14 +116,15 @@ class Main:
                             board.move(dragger.piece, move)
                             game.sound_effect(captured)
                             board.set_true_en_passant(dragger.piece)
-                            game.show_bg(screen)
-                            game.show_last_move(screen)
-                            game.show_moves(screen)
                             game.next_turn()
-
-                            if game.next_player == 'black':
-                                self.play_ai_move()
                     dragger.undrag_piece()
+                    game.show_bg(screen)
+                    game.show_last_move(screen)
+                    game.show_moves(screen)
+                    game.show_pieces(screen)
+                    game.show_hover(screen)
+                    if game.next_player == 'black':
+                        pygame.event.post(pygame.event.Event(AI_MOVE_EVENT))
 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_r:
